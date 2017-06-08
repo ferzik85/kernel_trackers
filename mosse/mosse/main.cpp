@@ -163,8 +163,8 @@ int main(int argc, char* argv[])
 	if (argc == 10) {
 		trackerId = atoi(argv[1]);
 		mosse = atoi(argv[2]); // 1 - true; 0 - false
-		left = atoi(argv[3]);
-		top = atoi(argv[4]);
+		left = atoi(argv[3])-1;
+		top = atoi(argv[4])-1;
 		width = atoi(argv[5]);
 		height = atoi(argv[6]);
 		count = atoi(argv[7]); // число картинок, которые будут прсомотрены последовательно
@@ -300,8 +300,8 @@ void processImagesMOSSE(int _mosse, int left, int top, int width, int height, in
 		cv::putText(ImRGBRes, "Tracker: " + ss3.str() + "fps", Point(5, 40), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(29, 45, 255));
 		cv::imshow("Tracker", ImRGBRes);
 		stringstream ostr; ostr << frameNumberString.c_str(); string nums; ostr >> nums;
-		//string imageToSave = "Frame/frame_" + nums + ".png";
-		//cv::imwrite(imageToSave, ImRGBRes);
+		string imageToSave = "Frame/frame_" + nums + ".png";
+		cv::imwrite(imageToSave, ImRGBRes);
 		keyboard = waitKey(1);
 
 		// save to file current bb

@@ -336,6 +336,7 @@ namespace kcf {
 						Out[0][r] = ((0.2989f*In[c] + 0.5870f*In[c + n] + 0.1140f*In[c + n2]) / 255.0f);
 						mean += Out[0][r];
 					}
+				mean /= h*w;
 				for (int i = 0; i < h; i++)
 					for (int j = 0; j < w; j++) {
 						r = j + i*w;

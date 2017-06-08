@@ -160,8 +160,8 @@ int main(int argc, char* argv[])
 
 	if (argc == 9) {
 		trackerId = atoi(argv[1]);
-		left = atoi(argv[2]);
-		top = atoi(argv[3]);
+		left = atoi(argv[2])-1;
+		top = atoi(argv[3])-1;
 		width = atoi(argv[4]);
 		height = atoi(argv[5]);
 		count = atoi(argv[6]); // число картинок, которые будут прсомотрены последовательно
