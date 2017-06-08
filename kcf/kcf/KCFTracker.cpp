@@ -364,14 +364,25 @@ namespace kcf {
 		}
 		else { // use only Hog
 
-			//compute fhog features in col-major order
+			//compute fhog features in col-major order	
 			float *normI = (float*)fftwf_malloc(sizeof(float) * n);
-			for (int i = 0; i < n; i++) {
-				normI[i] = In[i] / 255.0f;
+			if (din == 3) {
+				for (int i = 0; i < h; i++)
+					for (int j = 0; j < w; j++) {
+						c = i + j*h;
+						normI[c] = ((0.2989f*In[c] + 0.5870f*In[c + n] + 0.1140f*In[c + n2]) / 255.0f);
+					}
 			}
+			else
+				if (din == 1) {
+					for (int i = 0; i < n; i++) {
+						normI[i] = In[i] / 255.0f;
+					}
+				}
+
 			float *M = (float*)fftwf_malloc(sizeof(float) * n);
 			float *O = (float*)fftwf_malloc(sizeof(float) * n);
-			gradientMagnitude(normI, M, O, h, w, din, true);
+			gradientMagnitude(normI, M, O, h, w, 1, true); //gradientMagnitude(normI, M, O, h, w, din, true);
 			int binSize = cell_size; int nOrients = 9; int softBin = -1; float clip = 0.2f;
 			int hb = h / binSize; int wb = w / binSize; int nChns = nOrients * 3 + 5; int nb = hb*wb;
 			float *H = (float*)fftwf_malloc(sizeof(float) * hb*wb*nChns);

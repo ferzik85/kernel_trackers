@@ -1,4 +1,4 @@
-#define CPlusPlus
+//#define CPlusPlus
 
 #include "MOSSETracker.h"
 #include <Windows.h>
@@ -171,12 +171,12 @@ int main(int argc, char* argv[])
 		nzeros = atoi(argv[8]);
 		path = argv[9];
 		
-		cout << argv[0] << ' ' << mosse << ' ' << trackerId << ' ' << left   << ' ' << top  << ' ' << width << ' '
+		cout << argv[0] << ' ' << trackerId << ' ' << mosse << ' ' << left   << ' ' << top  << ' ' << width << ' '
 			 << height  << ' ' << count << ' ' << nzeros << ' ' << path << endl;
 		processImagesMOSSE(mosse, left, top, width, height, count, nzeros, path);
 	}
 	else {
-		cout << "you skip proper command arguments" << endl;
+		cout << argv[1] << "you skip proper command arguments" << endl;
 	}
 	
 	return 0;

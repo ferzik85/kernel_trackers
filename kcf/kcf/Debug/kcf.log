@@ -1,10 +1,2 @@
-﻿  matlab.cpp
-  main.cpp
-d:\my_sdk\opencv2_4_13\opencv\build\include\opencv2\flann\logger.h(66): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
-  KCFTracker.cpp
-  imResample.cpp
-  gradient.cpp
-  Generating Code...
-  kcf.vcxproj -> D:\GIthub\kcf\Debug\kcf.exe
-  kcf.vcxproj -> D:\GIthub\kcf\Debug\kcf.pdb (Full PDB)
+﻿  kcf.vcxproj -> D:\Github\kernel_trackers\kcf\Debug\kcf.exe
+  kcf.vcxproj -> D:\Github\kernel_trackers\kcf\Debug\kcf.pdb (Full PDB)
