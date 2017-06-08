@@ -160,7 +160,6 @@
     <ClCompile Include="imResample.cpp" />
     <ClCompile Include="KCFTracker.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="matlab.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

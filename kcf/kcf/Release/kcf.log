@@ -4,9 +4,10 @@
   main.cpp
 d:\my_sdk\opencv2_4_13\opencv\build\include\opencv2\flann\logger.h(66): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
-  matlab.cpp
   Generating code
-  All 414 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  437 of 442 functions (98.9%) were compiled, the rest were copied from previous compilation.
+    61 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  kcf.vcxproj -> D:\GIthub\kcf\Release\kcf.exe
-  kcf.vcxproj -> D:\GIthub\kcf\Release\kcf.pdb (Full PDB)
+  kcf.vcxproj -> D:\GIthub\kernel_trackers\kcf\Release\kcf.exe
+  kcf.vcxproj -> D:\GIthub\kernel_trackers\kcf\Release\kcf.pdb (Full PDB)
