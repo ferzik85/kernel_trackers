@@ -32,7 +32,7 @@ int main()
 
 void processImagesMOSSE(char* fistFrameFilename) {
 
-	bool use_gray = true; // always
+	bool use_gray = true; // if image is gray 8-bit use_gray must be true; if image is color 24-bit then use any value; other image types are not considered.
 	cv::Mat Im;
 	if (use_gray == true)
 		Im = imread(fistFrameFilename, CV_LOAD_IMAGE_GRAYSCALE);
@@ -41,8 +41,8 @@ void processImagesMOSSE(char* fistFrameFilename) {
 
 	if (Im.empty()) { cerr << "Unable to open first image frame: " << fistFrameFilename << endl; exit(EXIT_FAILURE); }
 	cv::Mat ImRGBRes; keyboard = 0;
-	//mosse_tracker mosse(true);  // mosse
-	mosse_tracker mosse(false); // dcf
+	mosse_tracker mosse(true);  // mosse
+	//mosse_tracker mosse(false); // dcf
 	bool init = false;
 	unsigned char *dataYorR; unsigned char *dataG; unsigned char *dataB;
 	string fn(fistFrameFilename);
@@ -131,8 +131,8 @@ void processImagesMOSSE(char* fistFrameFilename) {
 		cv::putText(ImRGBRes, "Tracker: " + ss3.str() + "fps", Point(5, 40), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(29, 45, 255));
 		cv::imshow("Tracker", ImRGBRes);
 		stringstream ostr; ostr << frameNumberString.c_str(); string nums; ostr >> nums;
-		string imageToSave = "Frame/frame_" + nums + ".png";
-		cv::imwrite(imageToSave, ImRGBRes);
+		//string imageToSave = "Frame/frame_" + nums + ".png";
+		//cv::imwrite(imageToSave, ImRGBRes);
 		keyboard = waitKey(1);
 		ostringstream oss;
 		oss << setfill('0') << setw(4) << (frameNumber + 1);
@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
 
 void processImagesMOSSE(int _mosse, int left, int top, int width, int height, int count, int nzeros, char* fistFrameFilename) {
 
-	bool use_gray = false; // true - fast but maybe less precise, false - slower tracking but better
+	bool use_gray = false; // if image is gray 8-bit use_gray must be true; if image is color 24-bit then use any value; other image types are not considered.
 	cv::Mat Im;
 	if (use_gray == true)
 		Im = imread(fistFrameFilename, CV_LOAD_IMAGE_GRAYSCALE);
@@ -239,8 +239,8 @@ void processImagesMOSSE(int _mosse, int left, int top, int width, int height, in
 				for (int i = 0; i < Im.cols; i++)
 				{
 					dataYorR[i + j*Im.cols] = p[i];
-					dataG[i + j*Im.cols] = p[i];
-					dataB[i + j*Im.cols] = p[i];
+					//dataG[i + j*Im.cols] = p[i];
+					//dataB[i + j*Im.cols] = p[i];
 				}
 			}
 		}
@@ -300,8 +300,8 @@ void processImagesMOSSE(int _mosse, int left, int top, int width, int height, in
 		cv::putText(ImRGBRes, "Tracker: " + ss3.str() + "fps", Point(5, 40), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(29, 45, 255));
 		cv::imshow("Tracker", ImRGBRes);
 		stringstream ostr; ostr << frameNumberString.c_str(); string nums; ostr >> nums;
-		string imageToSave = "Frame/frame_" + nums + ".png";
-		cv::imwrite(imageToSave, ImRGBRes);
+		//string imageToSave = "Frame/frame_" + nums + ".png";
+		//cv::imwrite(imageToSave, ImRGBRes);
 		keyboard = waitKey(1);
 
 		// save to file current bb

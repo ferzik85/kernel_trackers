@@ -259,6 +259,9 @@ void gradMagNormalization( float *M, float *S, int h, int w, float norm ) {
 	for(; i<n; i++) M[i] /= (S[i] + norm);
 }
 
+
+
+
 // helper for gradHist, quantize O and M into O0, O1 and M0, M1 
 void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
 				  int nb, int n, float norm, int nOrients, bool full, bool interpolate )
@@ -276,7 +279,6 @@ void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
 	_M0=(__m128*) M0; 
 	_M1=(__m128*) M1;
 #endif
-
 	if( interpolate ) 
 #ifdef SSEv2
 		for( i=0; i<=n-4; i+=4 ) {
@@ -285,7 +287,7 @@ void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
 			_o1=ADD(_o0,_nb); _o1=AND(CMPGT(_oMax,_o1),_o1); *_O1++=_o1;
 			_m=MUL(LDu(M[i]),_norm); *_M1=MUL(_od,_m); *_M0++=SUB(_m,*_M1); _M1++;
 		} 
-#else
+#else 
 		for( i=0; i<=n-4; i++ ) {
 			o = O[i] * oMult; o0=(int) o; od= o - (float)o0;
 			o0 *= nb; o0 = (oMax > o0) ? o0 : 0; O0[i]=o0;
@@ -296,15 +298,23 @@ void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
 	else 
 #ifdef SSEv2
 		for( i=0; i<=n-4; i+=4 ) {
-			_o=MUL(LDu(O[i]),_oMult); _o0=CVT(ADD(_o,SET(.5f)));
-			_o0=CVT(MUL(CVT(_o0),_nbf)); _o0=AND(CMPGT(_oMax,_o0),_o0); *_O0++=_o0;
-			*_M0++=MUL(LDu(M[i]),_norm); *_M1++=SET(0.f); *_O1++=SET(0);
+			_o=MUL(LDu(O[i]),_oMult); 
+			_o0=CVT(ADD(_o,SET(.5f)));
+			_o0=CVT(MUL(CVT(_o0),_nbf)); 
+			_o0=AND(CMPGT(_oMax,_o0),_o0); 
+			*_O0++=_o0;
+			*_M0++=MUL(LDu(M[i]),_norm); 
+			*_M1++=SET(0.f); *_O1++=SET(0);
 		}
 #else
-		for( i=0; i<=n-4; i++ ) {
-			o=O[i]*oMult; o0=(int)(o+0.5f); o0 *= nb;
-			o0 = (oMax > o0) ? o0 : 0; O0[i]=o0; M0[i]*=norm; 	
-			M1[i]=0.0f; O1[i]=0;
+		for( i=0; i<n; i++ ) {
+			o=O[i]*oMult; 
+			o0=(int)(o+0.5f); 
+			o0 *= nb;
+			o0 = ((oMax > o0) ? o0 : 0);
+			O0[i]=o0; 
+			M0[i]= M[i]*norm;
+			M1[i]=0.f; O1[i]=0;
 		}  
 #endif
 		// compute trailing locations without sse
@@ -319,6 +329,8 @@ void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
 			M0[i]=M[i]*norm; M1[i]=0; O1[i]=0;
 		}
 }
+
+
 
 // compute nOrients gradient histograms per bin x bin block of pixels
 void gradientHist( float *M, float *O, float *H, int h, int w,
@@ -445,6 +457,7 @@ void gradientHist( float *M, float *O, float *H, int h, int w,
 				  H1 = H0+O1[y]+hb; *H1 += 0*M1[y]; *(H1+1) += 0*M1[y];
 				  *(H1+2) += ms[3]*M1[y]; *(H1+3) += ms[2]*M1[y];			 	
 #endif	
+
 			  }
 		  }
 
@@ -479,6 +492,9 @@ void gradientHist( float *M, float *O, float *H, int h, int w,
     y=hb-1; for( x=0; x<wb; x++ ) H[o*nb+x*hb+y]*=8.f/7.f;
   }
 }
+
+
+
 
 /******************************************************************************/
 
@@ -557,7 +573,7 @@ void fhog(float *M, float *O, float *H, int h, int w, int binSize,
 	const int hb = h / binSize, wb = w / binSize, nb = hb*wb, nbo = nb*nOrients;
 	float *N, *R1, *R2; int o, x;
 	// compute unnormalized constrast sensitive histograms	
-	R1 = (float*)fftwf_malloc(sizeof(float)*wb*hb*nOrients * 3);//3 чтобы не падало из-за обращени€ в €чейку дл€ которой не выделена пам€ть , а так должно быть 2
+	R1 = (float*)fftwf_malloc(sizeof(float)*wb*hb*nOrients * 3); //3 чтобы не падало из-за обращени€ в €чейку дл€ которой не выделена пам€ть , а так должно быть 2
 	memset(R1, 0, wb*hb*nOrients * 3 * sizeof(float));
 	gradientHist(M, O, R1, h, w, binSize, nOrients * 2, softBin, true);
 	// compute unnormalized contrast insensitive histograms	
@@ -574,4 +590,3 @@ void fhog(float *M, float *O, float *H, int h, int w, int binSize,
 	hogChannels(H + nbo * 3, R1, N, hb, wb, nOrients * 2, clip, 2);
 	fftwf_free(R1); fftwf_free(R2); fftwf_free(N);
 }
- 

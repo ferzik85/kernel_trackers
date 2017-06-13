@@ -24,7 +24,7 @@ namespace mosse {
 		if (_scale_sigma_factor < 0.01f && _scale_sigma_factor > 1.0f) scale_sigma_factor = 0.25f;
 		else scale_sigma_factor = _scale_sigma_factor;
 
-		if (_lambda < 0.0f && _lambda > 1.0f) lambda = 0.01f;
+		if (_lambda < 0.0f && _lambda > 1.0f) lambda = 0.0001f;
 		else lambda = _lambda;
 
 		if (_learning_rate < 0.0f && _learning_rate > 1.0f) learning_rate = 0.02f; //learning_rate = 0.075f; gray
@@ -40,10 +40,10 @@ namespace mosse {
 		else scale_model_max_area = _scale_model_max_area;
 
 		if (_mosse == true) {
-			dout = 1; cell_size = 1; //learning_rate = 0.075f; // gray
+			dout = 1; cell_size = 1; learning_rate = 0.075f; // gray
 		}
 		else {
-			dout = 31; cell_size = 4; //learning_rate = 0.02f; // hog - all-zeros channel features are not considered
+			dout = 31; cell_size = 4; learning_rate = 0.02f; // hog - all-zeros channel features are not considered
 		}
 		
 		dscale = 31; 
@@ -189,7 +189,7 @@ namespace mosse {
 						in = (cs - dx + dx) + csz[1] * (csz[0] + rs);  // левее
 					else
 						in = (cs - dx + dx) + csz[1] * (rs - dy + dy); // правее или равно пику			
-				y[in] = exp(-0.5f * (((rs * rs + cs * cs) / output_sigma2)));							
+				y[in] = exp(-0.5 * (((rs * rs + cs * cs) / output_sigma2)));							
 			}
 
 		fftwf_execute(pyf);
@@ -297,7 +297,7 @@ namespace mosse {
 				for (int i = 0; i < h; i++)
 					for (int j = 0; j < w; j++) {
 						r = j + i*w; c = i + j*h;
-						Out[0][r] = ((0.2989f*In[c] + 0.5870f*In[c + n] + 0.1140f*In[c + n2]) / 255.0f);
+						Out[0][r] = (0.2989f*In[c] + 0.5870f*In[c + n] + 0.1140f*In[c + n2])/255;
 						mean += Out[0][r];
 					}
 				mean /= h*w;
@@ -314,7 +314,7 @@ namespace mosse {
 					for (int i = 0; i < h; i++)
 						for (int j = 0; j < w; j++) {
 							r = j + i*w;
-							Out[0][r] = (In[i + j*h] / 255.0f);
+							Out[0][r] = In[i + j*h] / 255;
 							mean += Out[0][r];
 						}
 					mean /= h*w;
@@ -334,13 +334,13 @@ namespace mosse {
 				for (int i = 0; i < h; i++)
 					for (int j = 0; j < w; j++) {
 						 c = i + j*h;
-						 normI[c] = ((0.2989f*In[c] + 0.5870f*In[c + n] + 0.1140f*In[c + n2]) / 255.0f);
+						 normI[c] = (0.2989f*In[c] + 0.5870f*In[c + n] + 0.1140f*In[c + n2]) / 255;
 					}
 			}
 			else
 				if (din == 1) {
 					for (int i = 0; i < n; i++) {
-						normI[i] = In[i] / 255.0f;
+						normI[i] = In[i] / 255;
 					}
 				}
 
@@ -557,6 +557,8 @@ namespace mosse {
 			for (int j = 0; j < prodszhalf; j++) {
 				kf[j][0] += xtf[i][j][0] * xtf[i][j][0] + xtf[i][j][1] * xtf[i][j][1];
 				//kf[j][1] = 0;
+				//kf[j][0] += xtf[i][j][0] * xtf[i][j][0] + xtf[i][j][1] * xtf[i][j][1];
+				//kf[j][1] += -xtf[i][j][0] * xtf[i][j][1] + xtf[i][j][1] * xtf[i][j][0];
 			}
 			
 		for (int j = 0; j < prodszhalf; j++) 
@@ -565,7 +567,7 @@ namespace mosse {
 		// equation for fast training
 		for (int j = 0; j < prodszhalf; j++) { 
 			alphaf[j][0] = yf[j][0] / (kf[j][0] + lambda);  
-			alphaf[j][1] = yf[j][1] / (kf[j][0] + lambda);   
+			alphaf[j][1] = yf[j][1] / (kf[j][0] + lambda);  
 		}
 		
 		if (first == true) {
@@ -579,8 +581,7 @@ namespace mosse {
 				for (int j = 0; j < prodszhalf; j++) {
 					model_xtf[i][j][0] = xtf[i][j][0];
 					model_xtf[i][j][1] = xtf[i][j][1];
-				}
-		     
+				}	     
 		}
 		else {
 			for (int j = 0; j < prodszhalf; j++) {

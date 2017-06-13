@@ -4,8 +4,9 @@
 d:\my_sdk\opencv2_4_13\opencv\build\include\opencv2\flann\logger.h(66): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
   MOSSETracker.cpp
+MOSSETracker.cpp(192): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   Generating code
-  All 464 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 442 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   mosse.vcxproj -> D:\Github\kernel_trackers\mosse\Release\mosse.exe
   mosse.vcxproj -> D:\Github\kernel_trackers\mosse\Release\mosse.pdb (Full PDB)
