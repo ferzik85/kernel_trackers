@@ -30,7 +30,7 @@ namespace mosse { // correlation tracker namespace
 			float _scale_sigma_factor = 0.25f, float _lambda = 0.00010f,
 			float _learning_rate = 0.02f, //_learning_rate = 0.075f,
 			int _number_of_scales = 33,
-			float _scale_step = 1.02f, int _scale_model_max_area = 512, bool _use_scale_4_translation_estimate = false);
+			float _scale_step = 1.02f, int _scale_model_max_area = 512, bool _use_scale_4_translation_estimate = true);
 
 		~mosse_tracker();
 

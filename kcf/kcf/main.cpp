@@ -25,7 +25,7 @@ void processImagesKCF(char* fistFrameFilename);
 
 int main()
 { 
-	processImagesKCF("D:\\uav\\CACFT\\Context-Aware-CF-Tracking\\MOSSE\\sequences\\Jumping\\img\\0001.jpg");
+	processImagesKCF("D:\\Github\\data\\Jumping\\0001.jpg");
 	return 0;
 }
 

@@ -1,0 +1,4 @@
+﻿  MOSSETracker.cpp
+d:\github\kernel_trackers\mosse_ca\mosse_ca\mossetracker.cpp(214): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  mosse_ca.vcxproj -> D:\Github\kernel_trackers\mosse_ca\Debug\mosse_ca.exe
+  mosse_ca.vcxproj -> D:\Github\kernel_trackers\mosse_ca\Debug\mosse_ca.pdb (Full PDB)

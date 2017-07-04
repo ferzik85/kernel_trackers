@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="mosse_CA">
+      <UniqueIdentifier>{48fc1921-e582-4c52-9a7e-b83dd842f2d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{d49c91c7-8f4a-4075-b0cf-3ecf9b8ea6d7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MOSSETracker.cpp">
+      <Filter>mosse_CA</Filter>
+    </ClCompile>
+    <ClCompile Include="gradient.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="imResample.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MOSSETracker.h">
+      <Filter>mosse_CA</Filter>
+    </ClInclude>
+    <ClInclude Include="MOSSESettings.h">
+      <Filter>mosse_CA</Filter>
+    </ClInclude>
+    <ClInclude Include="gradient.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="sse.hpp">
+      <Filter>misc</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

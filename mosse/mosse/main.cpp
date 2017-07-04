@@ -26,7 +26,7 @@ void processImagesMOSSE(char* fistFrameFilename);
 
 int main()
 { 
-	processImagesMOSSE("D:\\uav\\CACFT\\Context-Aware-CF-Tracking\\MOSSE\\sequences\\Jumping\\img\\0001.jpg");	
+	processImagesMOSSE("D:\\Github\\data\\Jumping\\0001.jpg");	
 	return 0;
 }
 
