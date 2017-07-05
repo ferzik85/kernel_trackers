@@ -26,8 +26,9 @@ void processImagesMOSSE(char* fistFrameFilename);
 
 int main()
 { 
-	//processImagesMOSSE("D:\\Github\\data\\Jumping\\0001.jpg");	
+	//processImagesMOSSE("D:\\Github\\data\\Jumping\\0001.jpg");
 	processImagesMOSSE("D:\\Github\\data\\Human7\\0001.jpg");
+	//processImagesMOSSE("D:\\Github\\data\\dog\\00000001.jpg");
 
 	return 0;
 }
@@ -52,7 +53,9 @@ void processImagesMOSSE(char* fistFrameFilename) {
 	{
 		cv::Size dsize = cv::Size(Im.cols * 2, Im.rows * 2);
 		cv::resize(Im, ImRGBRes, dsize, 0, 0, INTER_LINEAR);
-		if (use_gray == true) {}
+		if (use_gray == true) {
+			cv::cvtColor(ImRGBRes, ImRGBRes, CV_GRAY2BGR); // for better viewing experience
+		}
 		else
 			cv::cvtColor(Im, Im, CV_BGR2RGB);
 
@@ -99,9 +102,11 @@ void processImagesMOSSE(char* fistFrameFilename) {
 			if (use_gray == true)
 				//mosse.initializeTargetModel(164-1, 126-1, 34, 33, w, h, dataYorR); // jumping
 			    mosse.initializeTargetModel(128 - 1, 169 - 1, 37, 116, w, h, dataYorR); // Human7
+			    //mosse.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR);   // dog
 			else
 				//mosse.initializeTargetModel(164 - 1, 126 - 1, 34, 33, w, h, dataYorR, dataG, dataB);   // jumping
 			    mosse.initializeTargetModel(128 - 1, 169 - 1, 37, 116, w, h, dataYorR); //  Human7
+			    //mosse.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR, dataG, dataB);   // dog
 		}
 
 		double fps = 0;
@@ -121,6 +126,7 @@ void processImagesMOSSE(char* fistFrameFilename) {
 
 		mosse.getNewLocationCoordinates(cx, cy, rw, rh, score);
 
+
 		init = true;
 		int  l = (cx - rw / 2); int  t = (cy - rh / 2);
 		int  r = (cx + rw / 2); int  b = (cy + rh / 2);
@@ -135,11 +141,11 @@ void processImagesMOSSE(char* fistFrameFilename) {
 		cv::putText(ImRGBRes, "Tracker: " + ss3.str() + "fps", Point(5, 40), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(29, 45, 255));
 		cv::imshow("Tracker", ImRGBRes);
 		stringstream ostr; ostr << frameNumberString.c_str(); string nums; ostr >> nums;
-		//string imageToSave = "Frame/frame_" + nums + ".png";
-		//cv::imwrite(imageToSave, ImRGBRes);
+		string imageToSave = "Frame/frame_" + nums + ".png";
+		cv::imwrite(imageToSave, ImRGBRes);
 		keyboard = waitKey(1);
 		ostringstream oss;
-		oss << setfill('0') << setw(4) << (frameNumber + 1);
+		oss << setfill('0') << setw(frameNumberString.length()) << (frameNumber + 1);
 		string nextFrameNumberString = oss.str();
 		string nextFrameFilename = prefix + nextFrameNumberString + suffix;
 		if (use_gray == true)

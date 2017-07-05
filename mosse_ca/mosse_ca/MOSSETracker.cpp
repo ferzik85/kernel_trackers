@@ -4,6 +4,7 @@
 #include <vector>
 #include "imResample.cpp"
 #include "gradient.h"
+//#include <math.h>
 
 #define PI 3.14159265f
 const float eps = std::numeric_limits<float>::epsilon();
@@ -24,13 +25,13 @@ namespace mosse {
 		if (_scale_sigma_factor < 0.01f && _scale_sigma_factor > 1.0f) scale_sigma_factor = 0.25f;
 		else scale_sigma_factor = _scale_sigma_factor;
 
-		if (_lambda1 < 0.0f && _lambda1 > 1.0f) lambda1 = 0.00010f;
+		if (_lambda1 < 0.0f && _lambda1 > 1.0f) lambda1 = 0.0001f;
 		else lambda1 = _lambda1;
 
 		if (_lambda2 < 0.0f && _lambda2 > 100.0f) lambda2 = 20.f;
 		else lambda2= _lambda2;
 
-		if (_learning_rate < 0.0f && _learning_rate > 1.0f) learning_rate = 0.05f; 
+		if (_learning_rate < 0.0f && _learning_rate > 1.0f) learning_rate = 0.05f; // настроить этот параметр для масштаба отдельно
 		else learning_rate = _learning_rate;
 
 		if (_number_of_scales < 0 && _number_of_scales > 50) nScales = 33;
@@ -48,18 +49,14 @@ namespace mosse {
 		else {
 			dout = 31; cell_size = 4; learning_rate = 0.015f; lambda2 = 25.f;  // hog - all-zeros channel features are not considered
 		}
-		
-		dscale = 31; 
-		
+
+		comp_learning_rate = 1 - learning_rate;
+		dscale = 31; 	
 		xt = (float**)fftwf_malloc(sizeof(float*) * dout);
 		xtf = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);
-		kf = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);
-		kfn = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);
+		kf = (float**)fftwf_malloc(sizeof(float*) * dout);
 		num = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);
-		den = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);
-		model_wf = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);
-		wf = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);
-	
+		model_wf = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);		
 		use_scale_4_translation_estimate = _use_scale_4_translation_estimate;
 		scale_window = new float[nScales]; scaleFactors = new float[nScales];
 		for (int ss = 0; ss < nScales; ss++)
@@ -85,9 +82,7 @@ namespace mosse {
 		for (int i = 0; i < dout; i++) fftwf_free(xtf[i]);
 		fftwf_free(xtf);
 		for (int i = 0; i < dout; i++) fftwf_free(model_wf[i]);
-		fftwf_free(model_wf);
-		for (int i = 0; i < dout; i++) fftwf_free(wf[i]);
-		fftwf_free(wf);
+		fftwf_free(model_wf);		
 		fftwf_free(rt); fftwf_free(respt);
 		fftwf_free(rts); fftwf_free(resps);
 		for (int i = 0; i < sizess; i++) fftwf_free(xs[i]);
@@ -100,19 +95,10 @@ namespace mosse {
 		delete[] scaleFactors;
 		delete[] scale_window;
 		delete[] cos_window;
-	
 		for (int i = 0; i < dout; i++) fftwf_free(kf[i]);
 		fftwf_free(kf);
-
-		for (int i = 0; i < dout; i++) fftwf_free(kfn[i]);
-		fftwf_free(kfn);
-
 		for (int i = 0; i < dout; i++) fftwf_free(num[i]);
 		fftwf_free(num);
-
-		for (int i = 0; i < dout; i++) fftwf_free(den[i]);
-		fftwf_free(den);
-
 		fftwf_cleanup();
 	}
 
@@ -162,8 +148,11 @@ namespace mosse {
 
 	bool mosse_tracker::initializeTargetModel(int c_x, int c_y, int t_w, int t_h, int _imw, int _imh, unsigned char* dataYorR, unsigned char* dataG, unsigned char* dataB)
 	{
-		if (c_x < 0 || c_x > _imw - 1) c_x = _imw / 2; if (c_y < 0 || c_y > _imh - 1) c_y = _imh / 2; // переделать случай некорректной инициализации
-		if (t_w < 8) t_w = 8; if (t_h < 8) t_h = 8;
+		bool goodinit = true;
+		if (c_x < 0 || c_x > _imw - 1) { c_x = _imw / 2; goodinit = false; }
+		if (c_y < 0 || c_y > _imh - 1) { c_y = _imh / 2; goodinit = false; }
+		if (t_w < 4) t_w = 4; 
+		if (t_h < 4) t_h = 4;
 
 		imw = _imw; imh = _imh; ix = c_x; iy = c_y; iw = t_w; ih = t_h; score = 1;
 		base_target_sz[0] = ih;  base_target_sz[1] = iw;
@@ -211,7 +200,7 @@ namespace mosse {
 						in = (cs - dx + dx) + csz[1] * (csz[0] + rs);  // левее
 					else
 						in = (cs - dx + dx) + csz[1] * (rs - dy + dy); // правее или равно пику			
-				y[in] = exp(-0.5 * (((rs * rs + cs * cs) / output_sigma2)));							
+				y[in] = exp(-0.5f * (((rs * rs + cs * cs) / output_sigma2)));							
 			}
 
 		fftwf_execute(pyf);
@@ -285,25 +274,16 @@ namespace mosse {
 			xt[i] = (float*)fftwf_malloc(sizeof(float) * csz[1] * csz[0]);
 
 		for (int i = 0; i < dout; i++)
-			kf[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * prodszhalf);
-
-		for (int i = 0; i < dout; i++)
-			kfn[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * prodszhalf);
+			kf[i] = (float*)fftwf_malloc(sizeof(float) * prodszhalf);
 
 		for (int i = 0; i < dout; i++)
 			num[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * prodszhalf);
-
-		for (int i = 0; i < dout; i++)
-			den[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * prodszhalf);
 
 		for (int i = 0; i < dout; i++)
 			xtf[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * prodszhalf);
 
 		for (int i = 0; i < dout; i++)
 			model_wf[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * prodszhalf);
-
-		for (int i = 0; i < dout; i++)
-			wf[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * prodszhalf);
 
 		pxtf = (fftwf_plan*)fftwf_malloc(sizeof(fftwf_plan) * dout);
 		for (int j = 0; j < dout; j++)
@@ -318,7 +298,7 @@ namespace mosse {
 		// extract the training sample feature map for the translation filter	
 		extract_training_sample_info(dataYorR, dataG, dataB, true);
 
-		return true;
+		return goodinit;
 	}
 
 	void mosse_tracker::get_translation_feature_map(float *In, float **Out, int h, int w, int din)
@@ -507,8 +487,6 @@ namespace mosse {
 		// make sure the size is not to small
 		if (patch_sz[0] <= 1) patch_sz[0] = 4; if (patch_sz[1] <= 1) patch_sz[1] = 4;
 
-		// modify offset and maybe size
-
 		int cx, cy;
 		if (index != -1) {
 			cx = ix + offset[index][1];
@@ -537,9 +515,9 @@ namespace mosse {
 		imResampleWrapper(im_patch, resized_patch, ph, pw, h, w, d, 1.0);
 
 		//можно округлить значения элементов после ресемплинга
-		for (int i = 0; i < w * h * d; i++)
-			//resized_patch[i] = roundf(resized_patch[i]);
-			resized_patch[i] = float((int)(resized_patch[i] + 0.5f));
+		//for (int i = 0; i < w * h * d; i++)
+		//	//resized_patch[i] = roundf(resized_patch[i]);
+		//	resized_patch[i] = float((int)(resized_patch[i] + 0.5f));
 
 		// compute feature map	
 		get_translation_feature_map(resized_patch, sample, h, w, d);
@@ -608,60 +586,35 @@ namespace mosse {
 			}
 
 	    // kf = xtf.*conj(xtf) <-- idea 
-		for (int i = 0; i < dout; i++) {
-			memset(kf[i], 0, sizeof(fftwf_complex) * prodszhalf);
+		for (int i = 0; i < dout; i++) {	
 			for (int j = 0; j < prodszhalf; j++) {
-				kf[i][j][0] = xtf[i][j][0] * xtf[i][j][0] + xtf[i][j][1] * xtf[i][j][1];
-				//kf[i][j][1] = 0;
+				kf[i][j] = xtf[i][j][0] * xtf[i][j][0] + xtf[i][j][1] * xtf[i][j][1] + lambda1;
 			}
 		}
 			
-		//zero out kfn
-		for (int i = 0; i < dout; i++)
-			memset(kfn[i], 0, sizeof(fftwf_complex) * prodszhalf);
-
 		// obtain a sub-windows close to target for regression to 0
 		for (int index = 0; index < 4; index++) // we use only 4 hard coded sub-windows 
 		{
 			extract_translation_test_sample(dataYorR, dataG, dataB, index); 
-
 			// kfn(:,:,:,j) = conj(xfn) .*xfn; <-- idea
 			for (int i = 0; i < dout; i++)
 				for (int j = 0; j < prodszhalf; j++) {
-					kfn[i][j][0] += xtf[i][j][0] * xtf[i][j][0] + xtf[i][j][1] * xtf[i][j][1];
-					//kfn[i][j][1] = 0;
+					kf[i][j] += lambda2 * (xtf[i][j][0] * xtf[i][j][0] + xtf[i][j][1] * xtf[i][j][1]);
 				}
-		}
-  
-		// calculate denominator
-		for (int i = 0; i < dout; i++)
-			for (int j = 0; j < prodszhalf; j++) {
-				den[i][j][0] = kf[i][j][0] + lambda1 + lambda2 * kfn[i][j][0];
-				//den[i][j][1] = kf[i][j][1] + lambda1 + lambda2 * kfn[i][j][1];
-				den[i][j][1] = lambda1;
-			}
-		 
-		// wf	
-		for (int i = 0; i < dout; i++)
-			for (int j = 0; j < prodszhalf; j++) {		
-				wf[i][j][0] = num[i][j][0] / den[i][j][0];  // change deletaion for complex case
-				wf[i][j][1] = num[i][j][1] / den[i][j][0]; 
-			}
-	
-		if (first == true) {
+		} 
 
+		if (first == true) {
 			for (int i = 0; i < dout; i++)
 				for (int j = 0; j < prodszhalf; j++) {
-					model_wf[i][j][0] = wf[i][j][0];
-					model_wf[i][j][1] = wf[i][j][1];
+					model_wf[i][j][0] = num[i][j][0] / kf[i][j];
+					model_wf[i][j][1] = num[i][j][1] / kf[i][j];
 				}
 		}
 		else {
-			
 			for (int i = 0; i < dout; i++)
 				for (int j = 0; j < prodszhalf; j++) {
-					model_wf[i][j][0] = (1 - learning_rate) * model_wf[i][j][0] + learning_rate * wf[i][j][0];
-					model_wf[i][j][1] = (1 - learning_rate) * model_wf[i][j][1] + learning_rate * wf[i][j][1];
+					model_wf[i][j][0] = comp_learning_rate * model_wf[i][j][0] + learning_rate * (num[i][j][0] / kf[i][j]);
+					model_wf[i][j][1] = comp_learning_rate * model_wf[i][j][1] + learning_rate * (num[i][j][1] / kf[i][j]);
 				}
 		}
 
@@ -745,6 +698,7 @@ namespace mosse {
 
 		//find responce map
 		memset(rt, 0, sizeof(fftwf_complex) * prodszhalf);
+		
 		//sum(model_wf.*xtf, 3)
 		for (int i = 0; i < dout; i++)
 			for (int j = 0; j < prodszhalf; j++) {
@@ -753,7 +707,8 @@ namespace mosse {
 			}
 
 		fftwf_execute(prespt);
-		for (int j = 0; j <prodsz; j++) respt[j] /= (csz[0] * csz[1]); // you can safely uncomment this line
+		
+		//for (int j = 0; j <prodsz; j++) respt[j] /= (csz[0] * csz[1]); // you can safely uncomment this line
 
 		// find the maximum translation response
 		int mr = 0; int mc = 0; score = respt[0];
@@ -764,7 +719,9 @@ namespace mosse {
 				if (cv > score) { score = cv; mr = i; mc = j; }
 			}
 
-		//score /= (csz[0] * csz[1]);
+		score /= (csz[0] * csz[1]);
+
+		//if (isnan(score)) //stop!
 
 		if (mr > (csz[0] / 2)) //wrap around to negative half - space of vertical axis
 			mr -= csz[0];
@@ -821,6 +778,14 @@ namespace mosse {
 		else
 			if (currentScaleFactor > max_scale_factor)
 				currentScaleFactor = max_scale_factor;
+
+		//reset offsets according to currentScaleFactor
+		if (use_scale_4_translation_estimate == true) {
+			offset[0][0] = (int)floorf(float(-base_target_sz[0]) * currentScaleFactor);
+			offset[1][1] = (int)floorf(float(-base_target_sz[1]) * currentScaleFactor);
+			offset[2][0] = (int)floorf(float(base_target_sz[0]) * currentScaleFactor);
+			offset[3][1] = (int)floorf(float(base_target_sz[1]) * currentScaleFactor);
+		}
 
 		// extract training sample
 		extract_training_sample_info(dataYorR, dataG, dataB, false);

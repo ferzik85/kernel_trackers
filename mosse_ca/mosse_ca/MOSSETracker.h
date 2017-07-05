@@ -32,7 +32,7 @@ namespace mosse { // correlation tracker namespace
 			float _lambda2 = 20.f,
 			float _learning_rate = 0.05f, 
 			int _number_of_scales = 33,
-			float _scale_step = 1.02f, int _scale_model_max_area = 512, bool _use_scale_4_translation_estimate = true);
+			float _scale_step = 1.02f, int _scale_model_max_area = 512, bool _use_scale_4_translation_estimate = false);
 
 		~mosse_tracker();
 
@@ -49,6 +49,7 @@ namespace mosse { // correlation tracker namespace
 		float lambda1;             // regularization weight (denoted "lambda" in the paper)
 		float lambda2;             // regularization weight for CA
 		float learning_rate;       // tracking model learning rate(denoted "eta" in the paper)
+		float comp_learning_rate;
 		int nScales;               // number of scale levels(denoted "S" in the paper)
 		float scale_step;          // Scale increment factor(denoted "a" in the paper)
 		int scale_model_max_area;  // the maximum size of scale examples
@@ -120,13 +121,10 @@ namespace mosse { // correlation tracker namespace
 		fftwf_plan presps;
 
 		// MOSSE parameters
-		fftwf_complex **kf;
-		fftwf_complex **kfn;
-		fftwf_complex **wf;
+		float **kf;
 		fftwf_complex **model_wf;
 		fftwf_complex **num;
-		fftwf_complex **den;
-
+		
 	};
 
 }
